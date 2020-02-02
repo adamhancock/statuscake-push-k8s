@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: statuscakepush
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 0
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: statuscakepush
+              env:
+                - name: statuscake
+                  valueFrom:
+                    secretKeyRef:
+                      name: statuscake
+                      key: url
+              image: busybox
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/sh
+                - -c
+                - wget -q "$(statuscake)"
+          restartPolicy: OnFailure
